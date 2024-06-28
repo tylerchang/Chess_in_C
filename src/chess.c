@@ -41,7 +41,10 @@ struct Cell{
     struct Piece occupiedPiece;
     double x; // x coordinate of upper left corner of cell
     double y; // y coordinate of upper left corner of cell
+    int cell_row;
+    int cell_col;
 };
+
 
 void print_chess_board(struct Cell (*ptrBoard)[8][8]){
 
@@ -62,29 +65,30 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
 
         for(int row = 0; row<BOARD_WIDTH; row++){
         for(int column = 0; column<BOARD_HEIGHT; column++){
-            
-            int row_number = 8 - row;
-            (*ptrBoard)[row][column].number = row_number;
+            int chess_row_number = 8 - row;
+            (*ptrBoard)[row][column].number = chess_row_number;
+            (*ptrBoard)[row][column].cell_row = row;
+            (*ptrBoard)[row][column].cell_col = column;
             switch (column){
                 case 0: 
                     (*ptrBoard)[row][column].letter = 'a';
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "ROOK");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bRookPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
 
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "ROOK");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wRookPath);
@@ -98,23 +102,23 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                 case 1: 
                     (*ptrBoard)[row][column].letter = 'b';
                     
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "KNIGHT");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bKnightPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
 
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "KNIGHT");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wKnightPath);
@@ -127,23 +131,23 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                 case 2: 
                     (*ptrBoard)[row][column].letter = 'c';
                     
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "BISHOP");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bBishopPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
 
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "BISHOP");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wBishopPath);
@@ -156,22 +160,22 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                 case 3: 
                     (*ptrBoard)[row][column].letter = 'd';
 
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "QUEEN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bQueenPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "QUEEN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wQueenPath);
@@ -183,22 +187,22 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                     break;
                 case 4: 
                     (*ptrBoard)[row][column].letter = 'e';
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "KING");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bKingPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "KING");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wKingPath);
@@ -211,22 +215,22 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                 case 5: 
                     (*ptrBoard)[row][column].letter = 'f';
 
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "BISHOP");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bBishopPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "BISHOP");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wBishopPath);
@@ -238,22 +242,22 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                     break;
                 case 6: 
                     (*ptrBoard)[row][column].letter = 'g';
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "KNIGHT");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bKnightPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "KNIGHT");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wKnightPath);
@@ -265,22 +269,22 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
                     break;  
                 case 7: 
                     (*ptrBoard)[row][column].letter = 'h';
-                    if(row_number == 8){
+                    if(chess_row_number == 8){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "ROOK");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bRookPath);
                     }
-                    else if(row_number == 7){
+                    else if(chess_row_number == 7){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "B");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, bPawnPath);
                     }
-                    else if(row_number == 2){
+                    else if(chess_row_number == 2){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "PAWN");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wPawnPath);
                     }
-                    else if(row_number == 1){
+                    else if(chess_row_number == 1){
                         strcpy((*ptrBoard)[row][column].occupiedPiece.name, "ROOK");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.color, "W");
                         strcpy((*ptrBoard)[row][column].occupiedPiece.iconPath, wRookPath);
@@ -340,6 +344,7 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
 
 }
 
+
 int main(void) {
 
     SetTraceLogLevel(LOG_ERROR);
@@ -355,8 +360,7 @@ int main(void) {
     struct Cell chess_board [BOARD_WIDTH][BOARD_HEIGHT];
     int selected_row = -1;
     int selected_col = -1;
-    int mouseX;
-    int mouseY;
+    bool cell_is_selected = false;
 
     initialize_chess_board(&chess_board);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess");
@@ -377,7 +381,7 @@ int main(void) {
 
                 chess_board[row][col].x = currentX;
                 chess_board[row][col].y = currentY;
-                if(row == selected_row && col == selected_col){
+                if(cell_is_selected == true && row == selected_row && col == selected_col){
                     DrawRectangle(currentX, currentY, CELL_WIDTH, CELL_HEIGHT, CHESS_SELECTED);
                 }
                 else if(cellIsDark){
@@ -415,23 +419,64 @@ int main(void) {
                 }
             }
         }
-
         
+        // Cell selection
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            mouseX = GetMouseX();
-            mouseY = GetMouseY();
-            int *cell_info = convert_mouse_coordinates_to_cell(mouseX, mouseY);
-            int rowSelected = cell_info[0];
-            int colSelected = cell_info[1];
-            struct Cell selectedCell = chess_board[rowSelected][colSelected];
-            printf("Cell: %c%d\n", selectedCell.letter, selectedCell.number);
-            printf("Occupancy: %s %s\n", selectedCell.occupiedPiece.color, selectedCell.occupiedPiece.name);
-            
-            // Updates the selected values which will render a yellow color of the cell when drawn again
-            selected_row = rowSelected;
-            selected_col = colSelected;
+            // If something is already selected for the next move
+            if(cell_is_selected == true){
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                    int *target_cell_info = convert_mouse_coordinates_to_cell(GetMouseX(), GetMouseY());
+                    int target_row = target_cell_info[0];
+                    int target_col = target_cell_info[1];
+                    free(target_cell_info);
+                    struct Cell target_cell = chess_board[target_row][target_col];
+                    struct Cell selected_cell = chess_board[selected_row][selected_col];
 
-            free(cell_info);
+                    printf("Target Cell: %c%d\n", target_cell.letter, target_cell.number);
+                    printf("Row: %d, Column: %d\n", target_cell.cell_row, target_cell.cell_col);
+                    printf("Target Cell Occupancy: %s %s\n\n", target_cell.occupiedPiece.color, target_cell.occupiedPiece.name);
+
+                    printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
+                    printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
+                    printf("Occupancy: %s %s\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
+
+                    // Check if move is valid, work in progress
+                    // bool validMove = check_move(&target_cell, &selected_cell)
+                    bool validMove = true;
+
+                    if(validMove){
+                        // Execute move
+                        chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
+                        strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
+                        strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
+                        strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+                    }
+
+                    // Deselect
+                    selected_row = -1;
+                    selected_col = -1;
+                    cell_is_selected = false;
+
+                }
+            } // else see if there is something new to select
+            else{
+                int *cell_info = convert_mouse_coordinates_to_cell(GetMouseX(), GetMouseY());
+                int parsed_row = cell_info[0];
+                int parsed_col = cell_info[1];
+                free(cell_info);
+                struct Cell selected_cell = chess_board[parsed_row][parsed_col];
+                printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
+                printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
+                printf("Occupancy: %s %s\n\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
+                
+                // Updates the selected values which will render a yellow color of the cell when drawn again, selecting another blank square will deselect
+                if(strcmp(selected_cell.occupiedPiece.name, "FREE") != 0){
+                    selected_row = parsed_row;
+                    selected_col = parsed_col;
+                    cell_is_selected = true;
+                }
+
+            }
         }
         
 
@@ -449,8 +494,3 @@ int main(void) {
     return 0;
 }
 
-
-
-
-
-           
