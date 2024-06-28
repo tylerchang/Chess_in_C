@@ -4,6 +4,7 @@
 #include <stdlib.h> 
 #include <string.h>
 #define CHESS_DARK (Color){ 111,115,210, 255 }
+#define CHESS_SELECTED (Color){ 244,244, 43, 255 }
 #define CHESS_LIGHT (Color){ 157,172,255, 255 }
 
 const int BOARD_WIDTH = 8;
@@ -30,7 +31,7 @@ const char wQueenPath[] = "../assets/white-queen.png";
 
 struct Piece{
     char name[40]; // name of a piece or FREE
-    char color[6]; // BLACK, WHITE, or FREE
+    char color[6]; // BLACK, WHITE, or F
     char iconPath[64];
 };
 
@@ -295,17 +296,76 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
     }
 }
 
+int *convert_mouse_coordinates_to_cell(int mX, int mY){
+
+    int *cell_info = (int*)malloc(2*sizeof(int));
+    int row_number;
+    int col_number;
+    
+    // Checking x coordinate ==> col_number
+    int x_start_bound = 0;
+    int x_end_bound = CELL_WIDTH;
+    int x_index = 0;
+
+    // Checking y coordinate ==> row_number
+    int y_start_bound = 0;
+    int y_end_bound = CELL_HEIGHT;
+    int y_index = 0;
+
+    while (x_end_bound <= WINDOW_WIDTH){
+        if(mX >= x_start_bound && mX <= x_end_bound){
+            col_number = x_index;
+            break;
+        }
+        x_start_bound += CELL_WIDTH;
+        x_end_bound += CELL_WIDTH;
+        x_index += 1;
+    }
+
+    while (y_end_bound <= WINDOW_HEIGHT){
+        if(mY >= y_start_bound && mY <= y_end_bound){
+            row_number = y_index;
+            break;
+        }
+        y_start_bound += CELL_HEIGHT;
+        y_end_bound += CELL_HEIGHT;
+        y_index += 1;
+    }
+
+    // Setting the return data, [0] => row number, [1] => column number
+    cell_info[0] = row_number;
+    cell_info[1] = col_number;
+    
+    return cell_info;
+
+}
+
 int main(void) {
 
+    SetTraceLogLevel(LOG_ERROR);
+    // LOG_ALL: 0
+    // LOG_TRACE: 1
+    // LOG_DEBUG: 2
+    // LOG_INFO: 3
+    // LOG_WARNING: 4
+    // LOG_ERROR: 5
+    // LOG_FATAL: 6
+    // LOG_NONE: 7
+
     struct Cell chess_board [BOARD_WIDTH][BOARD_HEIGHT];
+    int selected_row = -1;
+    int selected_col = -1;
+    int mouseX;
+    int mouseY;
+
     initialize_chess_board(&chess_board);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess");
 
     while (!WindowShouldClose()) {
+
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
-
         // Drawing the grid and attaching coordinates to chess_board Cells
         int row = 0;
         int col = 0;
@@ -314,13 +374,18 @@ int main(void) {
         bool cellIsDark = false;
         while(row<8){
             while(col<8){
-                if(cellIsDark){
+
+                chess_board[row][col].x = currentX;
+                chess_board[row][col].y = currentY;
+                if(row == selected_row && col == selected_col){
+                    DrawRectangle(currentX, currentY, CELL_WIDTH, CELL_HEIGHT, CHESS_SELECTED);
+                }
+                else if(cellIsDark){
                     DrawRectangle(currentX, currentY, CELL_WIDTH, CELL_HEIGHT, CHESS_DARK);
                 }else{
                     DrawRectangle(currentX, currentY, CELL_WIDTH, CELL_HEIGHT, CHESS_LIGHT);
                 }
-                chess_board[row][col].x = currentX;
-                chess_board[row][col].y = currentY;
+
                 cellIsDark = !cellIsDark;
                 currentX += CELL_WIDTH;
                 col+=1;
@@ -338,7 +403,6 @@ int main(void) {
         for(int i = 0; i<BOARD_HEIGHT; i++){
             for(int j = 0; j<BOARD_WIDTH; j++){
                 if(strcmp(chess_board[i][j].occupiedPiece.name, "FREE") != 0){
-
                     Image image = LoadImage(chess_board[i][j].occupiedPiece.iconPath);
                     ImageResize(&image, CELL_WIDTH, CELL_HEIGHT);
                     Texture2D texture = LoadTextureFromImage(image);
@@ -352,15 +416,33 @@ int main(void) {
             }
         }
 
+        
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            mouseX = GetMouseX();
+            mouseY = GetMouseY();
+            int *cell_info = convert_mouse_coordinates_to_cell(mouseX, mouseY);
+            int rowSelected = cell_info[0];
+            int colSelected = cell_info[1];
+            struct Cell selectedCell = chess_board[rowSelected][colSelected];
+            printf("Cell: %c%d\n", selectedCell.letter, selectedCell.number);
+            printf("Occupancy: %s %s\n", selectedCell.occupiedPiece.color, selectedCell.occupiedPiece.name);
+            
+            // Updates the selected values which will render a yellow color of the cell when drawn again
+            selected_row = rowSelected;
+            selected_col = colSelected;
+
+            free(cell_info);
+        }
+        
+
         EndDrawing();
         
-        // Freeing all the textures from the array and the pointer to the malloc
+        // // Freeing all the textures from the array and the pointer to the malloc
         for(int i = 0; i < sizeOfUsedTexturesArray; i++){
             UnloadTexture(ptrUsedTextures[i]);
         }
         free(ptrUsedTextures);
      }
-
 
     CloseWindow();
 
