@@ -32,17 +32,17 @@ const char wQueenPath[] = "../assets/white-queen.png";
 struct Piece{
     char name[40]; // name of a piece or FREE
     char color[6]; // "B", "W", or "F"
-    char iconPath[64];
+    char iconPath[64]; // path to render sprite
 };
 
 struct Cell{
-    int number;
-    char letter;
+    int number; // column number based on chess notation
+    char letter; // letter based on chess notation
     struct Piece occupiedPiece;
     double x; // x coordinate of upper left corner of cell
     double y; // y coordinate of upper left corner of cell
-    int cell_row;
-    int cell_col;
+    int cell_row; // row index to access in the chess_board 2D array
+    int cell_col; // col index to access in the chess_board 2D array
 };
 
 
@@ -344,6 +344,91 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
 
 }
 
+bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_white_turn){
+
+    char selected_name[40];
+    strcpy(selected_name, selected_cell->occupiedPiece.name);
+    char selected_color[6];
+    strcpy(selected_color, selected_cell->occupiedPiece.color);
+    int selected_row = selected_cell->cell_row;
+    int selected_col = selected_cell->cell_col;
+    
+    char target_name[40];
+    strcpy(target_name, target_cell->occupiedPiece.name);
+    char target_color[6];
+    strcpy(target_color, target_cell->occupiedPiece.color);
+    int target_row = target_cell->cell_row;
+    int target_col = target_cell->cell_col;
+
+    printf("Selected: %s %s\n", selected_color, selected_name);
+    printf("Row: %d, Column: %d\n\n", selected_row, selected_col);
+
+    printf("Target Cell: %s %s\n", target_color, target_name);
+    printf("Row: %d, Column: %d\n\n", target_row, target_col);
+
+    // Check if target is opposite color
+    if(strcmp(selected_color, target_color) == 0){
+        return false;
+    }
+
+    // Check what kind selected is
+    if(strcmp("PAWN", selected_name) == 0){    
+        // Moving forward to an empty cell
+        // Check if the target is empty and if it is exactly one row above
+        if(*is_white_turn && (strcmp(target_name, "FREE") == 0) && (selected_row - 1 >= 0) && (target_row == selected_row - 1) && (target_col == selected_col)){
+            return true;
+        }
+        // first move allows for special 2 cell move
+        else if(*is_white_turn && (strcmp(target_name, "FREE") == 0) && (selected_row - 2 >= 0) && (target_row == selected_row - 2) && (target_col == selected_col) && (selected_row == 6)){
+            return true;
+        }
+        else if(!(*is_white_turn) && (strcmp(target_name, "FREE") == 0) && (selected_row + 1 < 8) && (target_row == selected_row + 1) && (target_col == selected_col)){
+            return true;
+        }
+        else if(!(*is_white_turn) && (strcmp(target_name, "FREE") == 0) && (selected_row + 2 >= 0) && (target_row == selected_row + 2) && (target_col == selected_col) && (selected_row == 1)){
+            return true;
+        }
+
+        // Eating another piece diagonally
+        if(*is_white_turn && (strcmp(target_name, "FREE")!=0) && (selected_col - 1 > 0) && (selected_row - 1 > 0) && (selected_col - 1 == target_col) && (selected_row - 1 == target_row)){
+            return true;
+        }
+        else if(*is_white_turn && (strcmp(target_name, "FREE")!=0) && (selected_col + 1 < 8) && (selected_row - 1 > 0) && (selected_col + 1 == target_col) && (selected_row - 1 == target_row)){
+            return true;
+        }
+        else if(!(*is_white_turn) && (strcmp(target_name, "FREE")!=0) && (selected_col - 1 > 0) && (selected_row + 1 < 8) && (selected_col - 1 == target_col) && (selected_row + 1 == target_row)){
+            return true;
+        }
+        else if(!(*is_white_turn) && (strcmp(target_name, "FREE")!=0) && (selected_col + 1 < 8) && (selected_row + 1 < 8) && (selected_col + 1 == target_col) && (selected_row + 1 == target_row)){
+            return true;
+        }
+        return false;
+    }
+    else if(strcmp("ROOK", selected_name) == 0){
+
+    }
+    else if(strcmp("KNIGHT", selected_name) == 0){
+        
+    }
+    else if(strcmp("BISHOP", selected_name) == 0){
+        
+    }
+    else if(strcmp("QUEEN", selected_name) == 0){
+        
+    }
+    else if(strcmp("KING", selected_name) == 0){
+        
+    }
+
+        // Calculate possible cells for move 
+
+        // Check if target position is in one of these cells
+
+        // Check for check
+
+
+    return true;
+}
 
 int main(void) {
 
@@ -433,24 +518,22 @@ int main(void) {
                     struct Cell target_cell = chess_board[target_row][target_col];
                     struct Cell selected_cell = chess_board[selected_row][selected_col];
 
-                    printf("Target Cell: %c%d\n", target_cell.letter, target_cell.number);
-                    printf("Row: %d, Column: %d\n", target_cell.cell_row, target_cell.cell_col);
-                    printf("Target Cell Occupancy: %s %s\n\n", target_cell.occupiedPiece.color, target_cell.occupiedPiece.name);
-
-                    printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
-                    printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
-                    printf("Occupancy: %s %s\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
-
                     // Check if move is valid, work in progress
-                    // bool validMove = check_move(&target_cell, &selected_cell)
-                    bool validMove = true;
+                    bool validMove = check_move(&target_cell, &selected_cell, &is_white_turn);
 
+                    // Execute move
                     if(validMove){
-                        // Execute move
                         chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+
+                        // Change turns
+                        if(is_white_turn){
+                            is_white_turn = false;
+                        }else{
+                            is_white_turn = true;
+                        }
                     }
 
                     // Deselect
@@ -458,13 +541,6 @@ int main(void) {
                     selected_col = -1;
                     cell_is_selected = false;
                     
-                    if(is_white_turn){
-                        is_white_turn = false;
-                    }else{
-                        is_white_turn = true;
-                    }
-                    
-
                 }
             } // else see if there is something new to select
             else{
@@ -473,9 +549,6 @@ int main(void) {
                 int parsed_col = cell_info[1];
                 free(cell_info);
                 struct Cell selected_cell = chess_board[parsed_row][parsed_col];
-                printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
-                printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
-                printf("Occupancy: %s %s\n\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
                 
                 // Updates the selected values which will render a yellow color of the cell when drawn again, selecting another blank square will deselect
                 if(strcmp(selected_cell.occupiedPiece.name, "FREE") != 0){
