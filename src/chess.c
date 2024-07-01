@@ -344,6 +344,18 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
 
 }
 
+bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_white_turn){
+    
+    printf("Target Cell: %c%d\n", target_cell->letter, target_cell->number);
+    printf("Row: %d, Column: %d\n", target_cell->cell_row, target_cell->cell_col);
+    printf("Target Cell Occupancy: %s %s\n\n", target_cell->occupiedPiece.color, target_cell->occupiedPiece.name);
+
+    printf("Selected Cell: %c%d\n", selected_cell->letter, selected_cell->number);
+    printf("Row: %d, Column: %d\n", selected_cell->cell_row, selected_cell->cell_col);
+    printf("Occupancy: %s %s\n", selected_cell->occupiedPiece.color, selected_cell->occupiedPiece.name);
+
+    return true;
+}
 
 int main(void) {
 
@@ -433,17 +445,8 @@ int main(void) {
                     struct Cell target_cell = chess_board[target_row][target_col];
                     struct Cell selected_cell = chess_board[selected_row][selected_col];
 
-                    printf("Target Cell: %c%d\n", target_cell.letter, target_cell.number);
-                    printf("Row: %d, Column: %d\n", target_cell.cell_row, target_cell.cell_col);
-                    printf("Target Cell Occupancy: %s %s\n\n", target_cell.occupiedPiece.color, target_cell.occupiedPiece.name);
-
-                    printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
-                    printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
-                    printf("Occupancy: %s %s\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
-
                     // Check if move is valid, work in progress
-                    // bool validMove = check_move(&target_cell, &selected_cell)
-                    bool validMove = true;
+                    bool validMove = check_move(&target_cell, &selected_cell, &is_white_turn);                    
 
                     if(validMove){
                         // Execute move
@@ -473,9 +476,9 @@ int main(void) {
                 int parsed_col = cell_info[1];
                 free(cell_info);
                 struct Cell selected_cell = chess_board[parsed_row][parsed_col];
-                printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
-                printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
-                printf("Occupancy: %s %s\n\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
+                // printf("Selected Cell: %c%d\n", selected_cell.letter, selected_cell.number);
+                // printf("Row: %d, Column: %d\n", selected_cell.cell_row, selected_cell.cell_col);
+                // printf("Occupancy: %s %s\n\n", selected_cell.occupiedPiece.color, selected_cell.occupiedPiece.name);
                 
                 // Updates the selected values which will render a yellow color of the cell when drawn again, selecting another blank square will deselect
                 if(strcmp(selected_cell.occupiedPiece.name, "FREE") != 0){
