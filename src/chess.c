@@ -344,7 +344,7 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
 
 }
 
-bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_white_turn){
+bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_white_turn, struct Cell(*current_board)[8][8]){
 
     char selected_name[40];
     strcpy(selected_name, selected_cell->occupiedPiece.name);
@@ -372,6 +372,7 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
     }
 
     // Check what kind selected is
+    // Pawn conditions
     if(strcmp("PAWN", selected_name) == 0){    
         // Moving forward to an empty cell
         // Check if the target is empty and if it is exactly one row above
@@ -404,18 +405,69 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
         }
         return false;
     }
+    // Rook conditions
     else if(strcmp("ROOK", selected_name) == 0){
 
+        if(selected_row == target_row){
+            if(target_col > selected_col){
+                int i = selected_col+1;
+                while(i < target_col){
+                    if(strcmp((*current_board)[selected_row][i].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i+=1;
+                }
+                return true;
+            }
+            else if(target_col < selected_col){
+                int i = selected_col-1;
+                while(i > target_col){
+                    if(strcmp((*current_board)[selected_row][i].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i-=1;
+                }
+                return true;
+            }
+        }
+        else if (selected_col == target_col){
+
+            if(target_row > selected_row){
+                int i = selected_row + 1;
+                while(i < target_row){
+                    if(strcmp((*current_board)[i][selected_col].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i += 1;
+                }
+                return true;
+            }
+            else if(target_row < selected_row){
+                int i = selected_row - 1;
+                while(i > target_row){
+                    if(strcmp((*current_board)[i][selected_col].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i -= 1;
+                }
+                return true;
+            }
+        }
+        return false;
     }
+    // Knight conditions
     else if(strcmp("KNIGHT", selected_name) == 0){
         
     }
+    // Bishop conditions
     else if(strcmp("BISHOP", selected_name) == 0){
         
     }
+    // Queen conditions
     else if(strcmp("QUEEN", selected_name) == 0){
         
     }
+    // King conditions
     else if(strcmp("KING", selected_name) == 0){
         
     }
@@ -519,10 +571,11 @@ int main(void) {
                     struct Cell selected_cell = chess_board[selected_row][selected_col];
 
                     // Check if move is valid, work in progress
-                    bool validMove = check_move(&target_cell, &selected_cell, &is_white_turn);
+                    bool validMove = check_move(&target_cell, &selected_cell, &is_white_turn, &chess_board);
 
                     // Execute move
                     if(validMove){
+                        printf("Valid Move\n");
                         chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
