@@ -391,13 +391,13 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
         }
 
         // Eating another piece diagonally
-        if(*is_white_turn && (strcmp(target_name, "FREE")!=0) && (selected_col - 1 > 0) && (selected_row - 1 > 0) && (selected_col - 1 == target_col) && (selected_row - 1 == target_row)){
+        if(*is_white_turn && (strcmp(target_name, "FREE")!=0) && (selected_col - 1 > -1) && (selected_row - 1 > -1) && (selected_col - 1 == target_col) && (selected_row - 1 == target_row)){
             return true;
         }
-        else if(*is_white_turn && (strcmp(target_name, "FREE")!=0) && (selected_col + 1 < 8) && (selected_row - 1 > 0) && (selected_col + 1 == target_col) && (selected_row - 1 == target_row)){
+        else if(*is_white_turn && (strcmp(target_name, "FREE")!=0) && (selected_col + 1 < 8) && (selected_row - 1 > -1) && (selected_col + 1 == target_col) && (selected_row - 1 == target_row)){
             return true;
         }
-        else if(!(*is_white_turn) && (strcmp(target_name, "FREE")!=0) && (selected_col - 1 > 0) && (selected_row + 1 < 8) && (selected_col - 1 == target_col) && (selected_row + 1 == target_row)){
+        else if(!(*is_white_turn) && (strcmp(target_name, "FREE")!=0) && (selected_col - 1 > -1) && (selected_row + 1 < 8) && (selected_col - 1 == target_col) && (selected_row + 1 == target_row)){
             return true;
         }
         else if(!(*is_white_turn) && (strcmp(target_name, "FREE")!=0) && (selected_col + 1 < 8) && (selected_row + 1 < 8) && (selected_col + 1 == target_col) && (selected_row + 1 == target_row)){
@@ -405,6 +405,7 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
         }
         return false;
     }
+    
     // Rook conditions
     else if(strcmp("ROOK", selected_name) == 0){
 
@@ -455,10 +456,39 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
         }
         return false;
     }
+    
     // Knight conditions
     else if(strcmp("KNIGHT", selected_name) == 0){
         
+        // There are a max of 8 possible moves for a knight
+        if((selected_row - 1 > -1) && (selected_row - 1 == target_row) && (selected_col + 2 < 8) && (selected_col + 2 == target_col)){
+            return true;
+        }
+        else if ((selected_row - 1 > -1) && (selected_row - 1 == target_row) && (selected_col - 2 > -1) && (selected_col - 2 == target_col)){
+            return true;
+        }
+        else if ((selected_row - 2 > -1) && (selected_row - 2 == target_row) && (selected_col + 1 < 8) && (selected_col + 1 == target_col)){
+            return true;
+        }
+        else if ((selected_row - 2 > -1) && (selected_row - 2 == target_row) && (selected_col - 1 >  -1) && (selected_col - 1 == target_col)){
+            return true;
+        }
+        else if((selected_row + 1 < 8) && (selected_row + 1 == target_row) && (selected_col + 2 < 8) && (selected_col + 2 == target_col)){
+            return true;
+        }
+        else if((selected_row + 1 < 8) && (selected_row + 1 == target_row) && (selected_col - 2 > -1) && (selected_col - 2 == target_col)){
+            return true;
+        }
+        else if((selected_row + 2 < 8) && (selected_row + 2 == target_row) && (selected_col + 1 < 8) && (selected_col + 1 == target_col)){
+            return true;
+        }
+        else if((selected_row + 2 < 8) && (selected_row + 2 == target_row) && (selected_col - 1 > -1) && (selected_col - 1 == target_col)){
+            return true;
+        }
+        return false;
+        
     }
+    
     // Bishop conditions
     else if(strcmp("BISHOP", selected_name) == 0){
         
