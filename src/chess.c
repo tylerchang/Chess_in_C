@@ -361,17 +361,16 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
     int target_col = target_cell->cell_col;
 
     printf("Selected: %s %s\n", selected_color, selected_name);
-    printf("Row: %d, Column: %d\n\n", selected_row, selected_col);
+    printf("Row: %d, Column: %d\n", selected_row, selected_col);
 
     printf("Target Cell: %s %s\n", target_color, target_name);
-    printf("Row: %d, Column: %d\n\n", target_row, target_col);
+    printf("Row: %d, Column: %d\n", target_row, target_col);
 
-    // Check if target is opposite color
+    // Check if target is the same color
     if(strcmp(selected_color, target_color) == 0){
         return false;
     }
 
-    // Check what kind selected is
     // Pawn conditions
     if(strcmp("PAWN", selected_name) == 0){    
         // Moving forward to an empty cell
@@ -491,7 +490,63 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
     
     // Bishop conditions
     else if(strcmp("BISHOP", selected_name) == 0){
-        
+
+        // Upper right diagonal
+        int r = selected_row - 1;
+        int c = selected_col + 1;
+        while (r > -1 && c < 8){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r-=1;
+            c+=1;
+        }
+
+        // Upper left diagonal
+        r = selected_row - 1;
+        c = selected_col - 1;
+        while(r > -1 && c > -1){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r-=1;
+            c-=1;
+        }
+
+        // Lower right diagonal
+        r = selected_row + 1;
+        c = selected_col + 1;
+        while(r < 8 && c < 8){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r+=1;
+            c+=1;
+        }
+
+        // Lower left diagonal
+        r = selected_row + 1;
+        c = selected_col - 1;
+        while(r < 8 && c > -1){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r+=1;
+            c-=1;
+        }
+        return false;
     }
     // Queen conditions
     else if(strcmp("QUEEN", selected_name) == 0){
@@ -502,13 +557,7 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
         
     }
 
-        // Calculate possible cells for move 
-
-        // Check if target position is in one of these cells
-
-        // Check for check
-
-
+    // Check for check
     return true;
 }
 
@@ -605,7 +654,7 @@ int main(void) {
 
                     // Execute move
                     if(validMove){
-                        printf("Valid Move\n");
+                        printf("Valid Move\n\n");
                         chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
@@ -617,6 +666,9 @@ int main(void) {
                         }else{
                             is_white_turn = true;
                         }
+                    }
+                    else{
+                        printf("Invalid Move\n\n");
                     }
 
                     // Deselect
@@ -641,13 +693,10 @@ int main(void) {
                         cell_is_selected = true;
                     }
                 }
-
             }
         }
-        
 
         EndDrawing();
-        
         // // Freeing all the textures from the array and the pointer to the malloc
         for(int i = 0; i < sizeOfUsedTexturesArray; i++){
             UnloadTexture(ptrUsedTextures[i]);
