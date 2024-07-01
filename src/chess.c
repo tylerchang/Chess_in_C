@@ -31,7 +31,7 @@ const char wQueenPath[] = "../assets/white-queen.png";
 
 struct Piece{
     char name[40]; // name of a piece or FREE
-    char color[6]; // BLACK, WHITE, or F
+    char color[6]; // "B", "W", or "F"
     char iconPath[64];
 };
 
@@ -361,6 +361,7 @@ int main(void) {
     int selected_row = -1;
     int selected_col = -1;
     bool cell_is_selected = false;
+    bool is_white_turn = true;
 
     initialize_chess_board(&chess_board);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess");
@@ -456,6 +457,13 @@ int main(void) {
                     selected_row = -1;
                     selected_col = -1;
                     cell_is_selected = false;
+                    
+                    if(is_white_turn){
+                        is_white_turn = false;
+                    }else{
+                        is_white_turn = true;
+                    }
+                    
 
                 }
             } // else see if there is something new to select
@@ -471,9 +479,11 @@ int main(void) {
                 
                 // Updates the selected values which will render a yellow color of the cell when drawn again, selecting another blank square will deselect
                 if(strcmp(selected_cell.occupiedPiece.name, "FREE") != 0){
-                    selected_row = parsed_row;
-                    selected_col = parsed_col;
-                    cell_is_selected = true;
+                    if((is_white_turn && strcmp(selected_cell.occupiedPiece.color, "W") == 0) || (!is_white_turn && strcmp(selected_cell.occupiedPiece.color, "B") == 0)){
+                        selected_row = parsed_row;
+                        selected_col = parsed_col;
+                        cell_is_selected = true;
+                    }
                 }
 
             }
