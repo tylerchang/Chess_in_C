@@ -551,6 +551,113 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
     // Queen conditions
     else if(strcmp("QUEEN", selected_name) == 0){
         
+        // Checking the "rook" portion of the queen
+
+        if(selected_row == target_row){
+            if(target_col > selected_col){
+                int i = selected_col+1;
+                while(i < target_col){
+                    if(strcmp((*current_board)[selected_row][i].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i+=1;
+                }
+                return true;
+            }
+            else if(target_col < selected_col){
+                int i = selected_col-1;
+                while(i > target_col){
+                    if(strcmp((*current_board)[selected_row][i].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i-=1;
+                }
+                return true;
+            }
+        }
+        else if (selected_col == target_col){
+
+            if(target_row > selected_row){
+                int i = selected_row + 1;
+                while(i < target_row){
+                    if(strcmp((*current_board)[i][selected_col].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i += 1;
+                }
+                return true;
+            }
+            else if(target_row < selected_row){
+                int i = selected_row - 1;
+                while(i > target_row){
+                    if(strcmp((*current_board)[i][selected_col].occupiedPiece.name, "FREE") != 0){
+                        return false;
+                    }
+                    i -= 1;
+                }
+                return true;
+            }
+        }
+
+        // Checking the "bishop" portion of the queen
+
+        // Upper right diagonal
+        int r = selected_row - 1;
+        int c = selected_col + 1;
+        while (r > -1 && c < 8){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r-=1;
+            c+=1;
+        }
+
+        // Upper left diagonal
+        r = selected_row - 1;
+        c = selected_col - 1;
+        while(r > -1 && c > -1){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r-=1;
+            c-=1;
+        }
+
+        // Lower right diagonal
+        r = selected_row + 1;
+        c = selected_col + 1;
+        while(r < 8 && c < 8){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r+=1;
+            c+=1;
+        }
+
+        // Lower left diagonal
+        r = selected_row + 1;
+        c = selected_col - 1;
+        while(r < 8 && c > -1){
+            if (r == target_row && c == target_col){
+                return true;
+            }
+            if(strcmp((*current_board)[r][c].occupiedPiece.name, "FREE") != 0 && r != target_row && c != target_col){
+                break;
+            }
+            r+=1;
+            c-=1;
+        }
+        return false;
+        
     }
     // King conditions
     else if(strcmp("KING", selected_name) == 0){
