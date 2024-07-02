@@ -403,8 +403,7 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
             return true;
         }
         return false;
-    }
-    
+    }  
     // Rook conditions
     else if(strcmp("ROOK", selected_name) == 0){
 
@@ -454,8 +453,7 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
             }
         }
         return false;
-    }
-    
+    }   
     // Knight conditions
     else if(strcmp("KNIGHT", selected_name) == 0){
         
@@ -486,8 +484,7 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
         }
         return false;
         
-    }
-    
+    }    
     // Bishop conditions
     else if(strcmp("BISHOP", selected_name) == 0){
 
@@ -661,11 +658,35 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
     }
     // King conditions
     else if(strcmp("KING", selected_name) == 0){
-        
+        if((selected_row - 1 > -1) && (selected_row - 1 == target_row) && (selected_col == target_col)){
+            return true;
+        }
+        else if ((selected_row - 1 > -1) && (selected_row - 1 == target_row) && (selected_col - 1 > -1) && (selected_col - 1 == target_col)){
+            return true;
+        }
+        else if ((selected_row - 1 > -1) && (selected_row - 1 == target_row) && (selected_col + 1 < 8) && (selected_col + 1 == target_col)){
+            return true;
+        }
+        else if ((selected_row == target_row) && (selected_col - 1 > -1) && (selected_col - 1 == target_col)){
+            return true;
+        }
+        else if ((selected_row == target_row) && (selected_col + 1 < 8) && (selected_col + 1 == target_col)){
+            return true;
+        }
+        else if((selected_row + 1 < 8) && (selected_row + 1 == target_row) && (selected_col == target_col)){
+            return true;
+        }
+        else if ((selected_row + 1 < 8) && (selected_row + 1 == target_row) && (selected_col - 1 > -1) && (selected_col - 1 == target_col)){
+            return true;
+        }
+        else if ((selected_row + 1 < 8) && (selected_row + 1 == target_row) && (selected_col + 1 < 8) && (selected_col + 1 == target_col)){
+            return true;
+        }
     }
 
     // Check for check
-    return true;
+    printf("impossible false returned \n");
+    return false;
 }
 
 int main(void) {
