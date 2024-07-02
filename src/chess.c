@@ -7,12 +7,11 @@
 #define CHESS_SELECTED (Color){ 244,244, 43, 255 }
 #define CHESS_LIGHT (Color){ 157,172,255, 255 }
 
-const int BOARD_WIDTH = 8;
-const int BOARD_HEIGHT = 8;
-const int WINDOW_WIDTH = 600;
-const int WINDOW_HEIGHT = 600;
-const double CELL_WIDTH = WINDOW_WIDTH / 8;
-const double CELL_HEIGHT = WINDOW_HEIGHT / 8;
+const int BOARD_WIDTH = 600;
+const int BOARD_HEIGHT = 600;
+const int MENU_WIDTH = 300;
+const double CELL_WIDTH = BOARD_WIDTH / 8;
+const double CELL_HEIGHT = BOARD_HEIGHT / 8;
 
 const char bRookPath[] = "../assets/black-rook.png";
 const char bKnightPath[] = "../assets/black-knight.png";
@@ -63,8 +62,8 @@ void print_chess_board(struct Cell (*ptrBoard)[8][8]){
 
 void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){ 
 
-        for(int row = 0; row<BOARD_WIDTH; row++){
-        for(int column = 0; column<BOARD_HEIGHT; column++){
+        for(int row = 0; row<8; row++){
+        for(int column = 0; column<8; column++){
             int chess_row_number = 8 - row;
             (*ptrBoard)[row][column].number = chess_row_number;
             (*ptrBoard)[row][column].cell_row = row;
@@ -316,7 +315,7 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
     int y_end_bound = CELL_HEIGHT;
     int y_index = 0;
 
-    while (x_end_bound <= WINDOW_WIDTH){
+    while (x_end_bound <= BOARD_WIDTH){
         if(mX >= x_start_bound && mX <= x_end_bound){
             col_number = x_index;
             break;
@@ -326,7 +325,7 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
         x_index += 1;
     }
 
-    while (y_end_bound <= WINDOW_HEIGHT){
+    while (y_end_bound <= BOARD_HEIGHT){
         if(mY >= y_start_bound && mY <= y_end_bound){
             row_number = y_index;
             break;
@@ -701,20 +700,20 @@ int main(void) {
     // LOG_FATAL: 6
     // LOG_NONE: 7
 
-    struct Cell chess_board [BOARD_WIDTH][BOARD_HEIGHT];
+    struct Cell chess_board [8][8];
     int selected_row = -1;
     int selected_col = -1;
     bool cell_is_selected = false;
     bool is_white_turn = true;
 
     initialize_chess_board(&chess_board);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess");
+    InitWindow(BOARD_WIDTH + MENU_WIDTH, BOARD_HEIGHT, "Chess");
 
     while (!WindowShouldClose()) {
 
         BeginDrawing();
-
         ClearBackground(RAYWHITE);
+
         // Drawing the grid and attaching coordinates to chess_board Cells
         int row = 0;
         int col = 0;
@@ -749,8 +748,8 @@ int main(void) {
         // Drawing the initial pieces and keeping track of all textures used, dynamically allocating more memory everytime a new texture is used
         Texture2D *ptrUsedTextures = (Texture2D*) malloc(sizeof(Texture2D));
         int sizeOfUsedTexturesArray = 1;
-        for(int i = 0; i<BOARD_HEIGHT; i++){
-            for(int j = 0; j<BOARD_WIDTH; j++){
+        for(int i = 0; i<8; i++){
+            for(int j = 0; j<8; j++){
                 if(strcmp(chess_board[i][j].occupiedPiece.name, "FREE") != 0){
                     Image image = LoadImage(chess_board[i][j].occupiedPiece.iconPath);
                     ImageResize(&image, CELL_WIDTH, CELL_HEIGHT);
@@ -823,6 +822,9 @@ int main(void) {
                 }
             }
         }
+        
+        DrawText(TextFormat("Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 80, 10, 50, CHESS_DARK);
+        // BOARD_WIDTH + MENU_WIDTH
 
         EndDrawing();
         // // Freeing all the textures from the array and the pointer to the malloc
