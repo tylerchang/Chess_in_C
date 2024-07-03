@@ -44,14 +44,11 @@ struct Cell{
     int cell_col; // col index to access in the chess_board 2D array
 };
 
-
+// Prints chess board in console, for testing
 void print_chess_board(struct Cell (*ptrBoard)[8][8]){
 
     for(int i = 0; i<8; i++){
         for(int j = 0; j<8; j++){
-            printf("| %f-", (*ptrBoard)[i][j].x);
-            printf("%f,", (*ptrBoard)[i][j].y);
-            
             printf(" %s-", (*ptrBoard)[i][j].occupiedPiece.color);
             printf("%s |", (*ptrBoard)[i][j].occupiedPiece.name);
         }
@@ -60,6 +57,7 @@ void print_chess_board(struct Cell (*ptrBoard)[8][8]){
     }
 }
 
+// Initializes the chess board by populating with pieces
 void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){ 
 
         for(int row = 0; row<8; row++){
@@ -299,6 +297,7 @@ void initialize_chess_board(struct Cell(*ptrBoard)[8][8]){
     }
 }
 
+// Converts the location of a click to accessible row and column numbers in the board
 int *convert_mouse_coordinates_to_cell(int mX, int mY){
 
     int *cell_info = (int*)malloc(2*sizeof(int));
@@ -343,6 +342,7 @@ int *convert_mouse_coordinates_to_cell(int mX, int mY){
 
 }
 
+// Function to check if a move is valid given selected cell, target cell, turn status, and what board to work with
 bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_white_turn, struct Cell(*current_board)[8][8]){
 
     char selected_name[40];
@@ -688,6 +688,154 @@ bool check_move(struct Cell* target_cell, struct Cell* selected_cell, bool* is_w
     return false;
 }
 
+// Function to check if the given position is within the bounds of the chess board
+bool is_within_bounds(int row, int col) {
+    return row >= 0 && row < 8 && col >= 0 && col < 8;
+}
+
+void copy_board(struct Cell (*original_board)[8][8], struct Cell (*new_board)[8][8]){
+    for(int r = 0; r<8; r++){
+        for(int c = 0; c<8; c++){
+            (*new_board)[r][c] = (*original_board)[r][c];
+        }
+    }
+}
+
+// Function to check if the king is in check
+bool is_in_check(int king_row, int king_col, struct Cell (*board)[8][8], bool checking_white_king) {
+    int i, j;
+
+    if(checking_white_king){
+        printf("Checking white king at row: %d, col: %d\n", king_row, king_col);
+    }else{
+        printf("Checking black king at row: %d, col: %d\n",  king_row, king_col);
+    }
+
+    // Check for threats from opponent's pawns
+    int pawn_row_offset = 1; // Assuming pawns move upwards for simplicity
+    int pawn_attack_direction[2] = {-1, 1}; // Pawns attack diagonally left and right
+
+    for (i = 0; i < 2; ++i) {
+        int check_row = king_row + pawn_row_offset;
+        int check_col = king_col + pawn_attack_direction[i];
+        if (is_within_bounds(check_row, check_col) && 
+            strcmp((*board)[check_row][check_col].occupiedPiece.name, "PAWN") == 0 && 
+            strcmp((*board)[check_row][check_col].occupiedPiece.color, "B") == 0 &&
+            checking_white_king) {
+            printf("check valid 1 \n");
+            return true; // King is in check by a pawn
+        }
+        if (is_within_bounds(check_row, check_col) && 
+            strcmp((*board)[check_row][check_col].occupiedPiece.name, "PAWN") == 0 && 
+            strcmp((*board)[check_row][check_col].occupiedPiece.color, "W") == 0 &&
+            !checking_white_king) {
+            printf("check valid 2 \n");
+            return true; // King is in check by a pawn
+        }
+    }
+
+    // Check for threats from opponent's knights
+    int knight_moves[8][2] = {{-2, -1}, {-1, -2}, {1, -2}, {2, -1},
+                              {2, 1}, {1, 2}, {-1, 2}, {-2, 1}};
+    for (i = 0; i < 8; ++i) {
+        int check_row = king_row + knight_moves[i][0];
+        int check_col = king_col + knight_moves[i][1];
+        if (is_within_bounds(check_row, check_col) &&
+            strcmp((*board)[check_row][check_col].occupiedPiece.name, "KNIGHT") == 0 && 
+            strcmp((*board)[check_row][check_col].occupiedPiece.color, "B") == 0 &&
+            checking_white_king) {
+            printf("check valid 3 \n");
+            return true; // King is in check by a knight
+        }
+        if (is_within_bounds(check_row, check_col) &&
+            strcmp((*board)[check_row][check_col].occupiedPiece.name, "KNIGHT") == 0 && 
+            strcmp((*board)[check_row][check_col].occupiedPiece.color, "W") == 0 &&
+            !checking_white_king) {
+            printf("check valid 4 \n");    
+            return true; // King is in check by a knight
+        }
+    }
+
+    // Check for threats from opponent's rooks and queens horizontally and vertically
+    int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    for (i = 0; i < 4; ++i) {
+        int dir_row = directions[i][0];
+        int dir_col = directions[i][1];
+        int check_row = king_row + dir_row;
+        int check_col = king_col + dir_col;
+        while (is_within_bounds(check_row, check_col)) {
+            struct Piece piece = (*board)[check_row][check_col].occupiedPiece;
+            if (strcmp(piece.name, "ROOK") == 0 || strcmp(piece.name, "QUEEN") == 0) {
+                if(checking_white_king && strcmp(piece.color, "B") == 0){
+                    printf("check valid 5 \n");
+                    return true; // King is in check by a rook or queen
+                }
+                if(!checking_white_king && strcmp(piece.color, "W") == 0){
+                    printf("check valid 6 \n");
+                    return true; // King is in check by a rook or queen
+                }
+            }
+            if (strcmp(piece.name, "FREE") != 0) {
+                break; // If we encounter any other piece, stop checking in this direction
+            }
+            check_row += dir_row;
+            check_col += dir_col;
+        }
+    }
+
+    // Check for threats from opponent's bishops and queens diagonally
+    int diagonal_directions[4][2] = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+    for (i = 0; i < 4; ++i) {
+        int dir_row = diagonal_directions[i][0];
+        int dir_col = diagonal_directions[i][1];
+        int check_row = king_row + dir_row;
+        int check_col = king_col + dir_col;
+        while (is_within_bounds(check_row, check_col)) {
+            struct Piece piece = (*board)[check_row][check_col].occupiedPiece;
+            if (strcmp(piece.name, "BISHOP") == 0 || strcmp(piece.name, "QUEEN") == 0) {
+                if(checking_white_king && strcmp(piece.color, "B") == 0){
+                    printf("check valid 7 \n");
+                    return true; // King is in check by a bishop or queen
+                }
+                if(!checking_white_king && strcmp(piece.color, "W") == 0){
+                    printf("check valid 8 \n");
+                    return true; // King is in check by a bishop or queen
+                }
+            }
+            if (strcmp(piece.name, "FREE") != 0) {
+                break; // If we encounter any other piece, stop checking in this direction
+            }
+            check_row += dir_row;
+            check_col += dir_col;
+        }
+    }
+
+    // Check for threats from opponent's king (unlikely in most scenarios due to rules)
+    int king_moves[8][2] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1},
+                            {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+    for (i = 0; i < 8; ++i) {
+        int check_row = king_row + king_moves[i][0];
+        int check_col = king_col + king_moves[i][1];
+        if (is_within_bounds(check_row, check_col) &&
+            strcmp((*board)[check_row][check_col].occupiedPiece.name, "KING") == 0) {
+            if(checking_white_king && strcmp((*board)[check_row][check_col].occupiedPiece.color, "B") == 0){
+                printf("check valid 9 \n");
+                return true; // King is in check by an opponent's king (rarely happens due to rules)
+            }
+            if(!checking_white_king && strcmp((*board)[check_row][check_col].occupiedPiece.color, "W") == 0){
+                printf("check valid 10 \n");
+                return true; // King is in check by an opponent's king (rarely happens due to rules)
+            }
+            
+        }
+    }
+
+    // If none of the conditions above were met, king is not in check
+    printf("king not in check reached\n");
+    return false;
+}
+
+
 int main(void) {
 
     SetTraceLogLevel(LOG_ERROR);
@@ -703,6 +851,10 @@ int main(void) {
     struct Cell chess_board [8][8];
     int selected_row = -1;
     int selected_col = -1;
+    int white_king_row = 7;
+    int white_king_col = 4;
+    int black_king_row = 0;
+    int black_king_col = 4;
     bool cell_is_selected = false;
     bool is_white_turn = true;
 
@@ -779,13 +931,50 @@ int main(void) {
                     // Check if move is valid, work in progress
                     bool validMove = check_move(&target_cell, &selected_cell, &is_white_turn, &chess_board);
 
-                    // Execute move
                     if(validMove){
+                        // Test for check
+                        struct Cell future_board[8][8];
+                        copy_board(&chess_board, &future_board);
+                        // Execute the future move
+                        future_board[target_row][target_col].occupiedPiece = future_board[selected_row][selected_col].occupiedPiece;
+                        strcpy(future_board[selected_row][selected_col].occupiedPiece.name, "FREE");
+                        strcpy(future_board[selected_row][selected_col].occupiedPiece.color, "F");
+                        strcpy(future_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+                        
+                        
+                        bool black_king_in_check = is_in_check(black_king_row, black_king_col, &future_board, false);
+                        
+                        bool white_king_in_check = is_in_check(white_king_row, white_king_col, &future_board, true);
+
+                        // Update Check:
+                        if(black_king_in_check){
+                            printf("Black king in check\n");
+                        }
+                        if(white_king_in_check){
+                            printf("White king in check\n");
+                        }
+                        if(!black_king_in_check && !white_king_in_check){
+                            printf("No king is in check\n");
+                        }
+
                         printf("Valid Move\n\n");
+
+                        // If move is a king, update king position
+                        if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0 && is_white_turn){
+                            white_king_row = target_row;
+                            white_king_col = target_col;
+                        }
+                        else if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0 && !is_white_turn){
+                            black_king_row = target_row;
+                            black_king_col = target_col;
+                        }
+
+                        // Making the move change
                         chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
                         strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+
 
                         // Change turns
                         if(is_white_turn){
@@ -794,6 +983,7 @@ int main(void) {
                             is_white_turn = true;
                         }
                     }
+                    
                     else{
                         printf("Invalid Move\n\n");
                     }
@@ -824,7 +1014,13 @@ int main(void) {
         }
         
         DrawText(TextFormat("Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 80, 10, 50, CHESS_DARK);
-        // BOARD_WIDTH + MENU_WIDTH
+
+        if(is_white_turn){
+            DrawText(TextFormat("White's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 100, 70, 30, BLACK);
+        }
+        else{
+            DrawText(TextFormat("Black's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 100, 70, 30, BLACK);
+        }
 
         EndDrawing();
         // // Freeing all the textures from the array and the pointer to the malloc
