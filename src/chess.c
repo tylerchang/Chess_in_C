@@ -831,7 +831,7 @@ bool is_in_check(int king_row, int king_col, struct Cell (*board)[8][8], bool ch
     }
 
     // If none of the conditions above were met, king is not in check
-    printf("king not in check reached\n");
+    printf("king not in check reached\n\n");
     return false;
 }
 
@@ -855,6 +855,8 @@ int main(void) {
     int white_king_col = 4;
     int black_king_row = 0;
     int black_king_col = 4;
+    bool white_is_in_check = false;
+    bool black_is_in_check = false;
     bool cell_is_selected = false;
     bool is_white_turn = true;
 
@@ -865,6 +867,9 @@ int main(void) {
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
+
+        // printf("White In Check: %s\n", white_is_in_check ? "true" : "false");
+        // printf("Black In Check: %s\n\n", black_is_in_check ? "true" : "false");
 
         // Drawing the grid and attaching coordinates to chess_board Cells
         int row = 0;
@@ -930,60 +935,177 @@ int main(void) {
 
                     // Check if move is valid, work in progress
                     bool validMove = check_move(&target_cell, &selected_cell, &is_white_turn, &chess_board);
-
+                    
+                    // If move complies with chess movement mechanics, excluding check
                     if(validMove){
+
                         // Test for check
                         struct Cell future_board[8][8];
                         copy_board(&chess_board, &future_board);
+
                         // Execute the future move
                         future_board[target_row][target_col].occupiedPiece = future_board[selected_row][selected_col].occupiedPiece;
                         strcpy(future_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                         strcpy(future_board[selected_row][selected_col].occupiedPiece.color, "F");
                         strcpy(future_board[selected_row][selected_col].occupiedPiece.iconPath, "");
-                        
-                        
-                        bool black_king_in_check = is_in_check(black_king_row, black_king_col, &future_board, false);
-                        
-                        bool white_king_in_check = is_in_check(white_king_row, white_king_col, &future_board, true);
 
-                        // Update Check:
-                        if(black_king_in_check){
-                            printf("Black king in check\n");
-                        }
-                        if(white_king_in_check){
-                            printf("White king in check\n");
-                        }
-                        if(!black_king_in_check && !white_king_in_check){
-                            printf("No king is in check\n");
-                        }
-
-                        printf("Valid Move\n\n");
-
-                        // If move is a king, update king position
-                        if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0 && is_white_turn){
-                            white_king_row = target_row;
-                            white_king_col = target_col;
-                        }
-                        else if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0 && !is_white_turn){
-                            black_king_row = target_row;
-                            black_king_col = target_col;
-                        }
-
-                        // Making the move change
-                        chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
-                        strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
-                        strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
-                        strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
-
-
-                        // Change turns
                         if(is_white_turn){
-                            is_white_turn = false;
-                        }else{
-                            is_white_turn = true;
+                            // If it's white's turn and white is already in check, and after the future move, white is still in check, it is an invalid move
+                            if(white_is_in_check){
+                                // If white will still be in check after the next move, it is an invalid move
+
+                                // If move is a king, update king position
+                                int old_white_king_row = white_king_row;
+                                int old_white_king_col = white_king_col;
+                                if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                    white_king_row = target_row;
+                                    white_king_col = target_col;
+                                }
+
+                                bool white_will_be_in_check = is_in_check(white_king_row, white_king_col, &future_board, true);
+                                if(white_will_be_in_check){
+                                    printf("Invalid Move, white will still be in check\n");
+                                    // Revert the king's position
+                                    if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                        white_king_row = old_white_king_row;
+                                        white_king_col = old_white_king_col;
+                                    }
+                                }
+                                // If white will no longer be in check after the move, it is a valid move
+                                else{
+                                    printf("Valid move, white is now out of check");
+                                    // Making the move change
+                                    chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+
+                                    // Updating check status
+                                    white_is_in_check = false;
+
+                                    // Changing turns
+                                    is_white_turn = false;               
+                                }
+
+                            }
+                            
+                            // If it's white's turn and white is not in check, check if the next move will put white in check, if so it is invalid
+                            // Else proceed to check if the future move will put black in check or not, both will be valid     
+                            else{
+                                int old_white_king_row = white_king_row;
+                                int old_white_king_col = white_king_col;
+                                if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                    white_king_row = target_row;
+                                    white_king_col = target_col;
+                                }
+                                
+                                bool white_will_be_in_check = is_in_check(white_king_row, white_king_col, &future_board, true);
+                                if(!white_will_be_in_check){
+                                    bool black_will_be_in_check = is_in_check(black_king_row, black_king_col, &future_board, false);
+                                    if(black_will_be_in_check){
+                                        black_is_in_check = true;
+                                    }
+                                    // Proceed to execute move
+
+                                    // Making the move change
+                                    chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+
+                                    // Changing turns
+                                    is_white_turn = false;  
+                                }
+                                else{
+                                    printf("Invalid, this move will put white in check\n");
+                                    // Revert the old king
+                                    if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                        white_king_row = old_white_king_row;
+                                        white_king_col = old_white_king_col;
+                                    }
+                                }
+                            }
+                        }               
+
+                        else{
+                            // If it's black's turn and black is already in check, and after the future move, black is still in check, it is an invalid move
+                            if(black_is_in_check){
+
+                                int old_black_king_row = black_king_row;
+                                int old_black_king_col = black_king_col;
+                                if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                    black_king_row = target_row;
+                                    black_king_col = target_col;
+                                }
+
+                                // If black will still be in check after the next move, it is an invalid move
+                                bool black_will_be_in_check = is_in_check(black_king_row, black_king_col, &future_board, false);
+                                if(black_will_be_in_check){
+                                    printf("Invalid Move, black will still be in check\n");
+                                    // Revert the old king
+                                    if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                        black_king_row = old_black_king_row;
+                                        black_king_col = old_black_king_col;
+                                    }
+                                }
+                                // If black will no longer be in check after the move, it is a valid move
+                                else{
+                                    printf("Valid move, black is now out of check");
+                                    // Making the move change
+                                    chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+
+                                    // Updating check status
+                                    black_is_in_check = false;
+
+                                    // Changing turns
+                                    is_white_turn = true;               
+                                }
+
+                            }
+                            
+                            // If it's black's turn and black is not in check, check if the next move will put black in check, if so it is invalid
+                            // Else proceed to check if the future move will put white in check or not, both will be valid     
+                            else{
+                                int old_black_king_row = black_king_row;
+                                int old_black_king_col = black_king_col;
+                                if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                    black_king_row = target_row;
+                                    black_king_col = target_col;
+                                }
+
+                                bool black_will_be_in_check = is_in_check(black_king_row, black_king_col, &future_board, false);
+                                if(!black_will_be_in_check){
+                                    bool white_will_be_in_check = is_in_check(white_king_row, white_king_col, &future_board, true);
+                                    if(white_will_be_in_check){
+                                        white_is_in_check = true;
+                                    }
+
+                                    // Making the move change
+                                    chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
+                                    strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
+
+                                    // Changing turns
+                                    is_white_turn = true;                                    
+                                }
+                                else{
+                                    printf("Invalid move, this will put black in check\n");
+                                    // Revert the old king
+                                    if(strcmp(chess_board[selected_row][selected_col].occupiedPiece.name, "KING") == 0){
+                                        black_king_row = old_black_king_row;
+                                        black_king_col = old_black_king_col;
+                                    }
+                                }
+                            }
                         }
+                    
                     }
                     
+                    // If move does not comply with movement mechanics, excluding check
                     else{
                         printf("Invalid Move\n\n");
                     }
@@ -1013,7 +1135,7 @@ int main(void) {
             }
         }
         
-        DrawText(TextFormat("Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 80, 10, 50, CHESS_DARK);
+        DrawText(TextFormat("Tyler's Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 125, 20, 35, CHESS_DARK);
 
         if(is_white_turn){
             DrawText(TextFormat("White's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 100, 70, 30, BLACK);
