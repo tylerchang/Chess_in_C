@@ -1144,6 +1144,13 @@ int main(void) {
             DrawText(TextFormat("Black's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 100, 70, 30, BLACK);
         }
 
+        if(white_is_in_check){
+            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 120, 30, BLACK);
+        }
+        if(black_is_in_check){
+            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 120, 30, BLACK);
+        }
+
         EndDrawing();
         // // Freeing all the textures from the array and the pointer to the malloc
         for(int i = 0; i < sizeOfUsedTexturesArray; i++){
