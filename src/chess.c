@@ -860,16 +860,23 @@ int main(void) {
     bool cell_is_selected = false;
     bool is_white_turn = true;
 
+    struct Piece *white_captures = (struct Piece*) malloc(sizeof(struct Piece));
+    int size_of_white_captures = 1;
+    struct Piece *black_captures = (struct Piece*) malloc(sizeof(struct Piece));
+    int size_of_black_captures = 1;
+
+
     initialize_chess_board(&chess_board);
     InitWindow(BOARD_WIDTH + MENU_WIDTH, BOARD_HEIGHT, "Chess");
 
     while (!WindowShouldClose()) {
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(CHESS_DARK);
 
-        // printf("White In Check: %s\n", white_is_in_check ? "true" : "false");
-        // printf("Black In Check: %s\n\n", black_is_in_check ? "true" : "false");
+        // Line to divide game and menu
+        // DrawLine(BOARD_WIDTH, 0, BOARD_WIDTH, BOARD_HEIGHT, BLACK); 
+        DrawLineEx((Vector2){BOARD_WIDTH, 0}, (Vector2){BOARD_WIDTH, BOARD_HEIGHT}, 10.0, BLACK); 
 
         // Drawing the grid and attaching coordinates to chess_board Cells
         int row = 0;
@@ -961,7 +968,7 @@ int main(void) {
                                     white_king_row = target_row;
                                     white_king_col = target_col;
                                 }
-
+                                // If white will be in check after the move, it is invalid
                                 bool white_will_be_in_check = is_in_check(white_king_row, white_king_col, &future_board, true);
                                 if(white_will_be_in_check){
                                     printf("Invalid Move, white will still be in check\n");
@@ -974,6 +981,15 @@ int main(void) {
                                 // If white will no longer be in check after the move, it is a valid move
                                 else{
                                     printf("Valid move, white is now out of check");
+
+                                    // Checking if it is capturing a piece
+                                    if(strcmp(chess_board[target_row][target_col].occupiedPiece.name, "FREE") != 0){
+                                        // If it's a capture, add to list of captures
+                                        white_captures[size_of_white_captures - 1] = chess_board[target_row][target_col].occupiedPiece;
+                                        white_captures = (struct Piece*) realloc(white_captures, (size_of_white_captures * sizeof(struct Piece)) + sizeof(struct Piece));
+                                        size_of_white_captures += 1;
+                                    }
+
                                     // Making the move change
                                     chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
@@ -1006,6 +1022,14 @@ int main(void) {
                                         black_is_in_check = true;
                                     }
                                     // Proceed to execute move
+
+                                    // Checking if it is capturing a piece
+                                    if(strcmp(chess_board[target_row][target_col].occupiedPiece.name, "FREE") != 0){
+                                        // If it's a capture, add to list of captures
+                                        white_captures[size_of_white_captures - 1] = chess_board[target_row][target_col].occupiedPiece;
+                                        white_captures = (struct Piece*) realloc(white_captures, (size_of_white_captures * sizeof(struct Piece)) + sizeof(struct Piece));
+                                        size_of_white_captures += 1;
+                                    }
 
                                     // Making the move change
                                     chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
@@ -1052,6 +1076,15 @@ int main(void) {
                                 else{
                                     printf("Valid move, black is now out of check");
                                     // Making the move change
+
+                                    // Checking if it is capturing a piece
+                                    if(strcmp(chess_board[target_row][target_col].occupiedPiece.name, "FREE") != 0){
+                                        // If it's a capture, add to list of captures
+                                        black_captures[size_of_black_captures - 1] = chess_board[target_row][target_col].occupiedPiece;
+                                        black_captures = (struct Piece*) realloc(black_captures, (size_of_black_captures * sizeof(struct Piece)) + sizeof(struct Piece));
+                                        size_of_black_captures += 1;
+                                    }
+
                                     chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
@@ -1084,6 +1117,15 @@ int main(void) {
                                     }
 
                                     // Making the move change
+
+                                    // Checking if it is capturing a piece
+                                    if(strcmp(chess_board[target_row][target_col].occupiedPiece.name, "FREE") != 0){
+                                        // If it's a capture, add to list of captures
+                                        black_captures[size_of_black_captures - 1] = chess_board[target_row][target_col].occupiedPiece;
+                                        black_captures = (struct Piece*) realloc(black_captures, (size_of_black_captures * sizeof(struct Piece)) + sizeof(struct Piece));
+                                        size_of_black_captures += 1;
+                                    }
+
                                     chess_board[target_row][target_col].occupiedPiece = chess_board[selected_row][selected_col].occupiedPiece;
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.name, "FREE");
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.color, "F");
@@ -1135,21 +1177,66 @@ int main(void) {
             }
         }
         
-        DrawText(TextFormat("Tyler's Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 125, 20, 35, CHESS_DARK);
+        DrawText(TextFormat("Tyler's Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 125, 20, 35, CHESS_LIGHT);
 
         if(is_white_turn){
-            DrawText(TextFormat("White's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 100, 70, 30, BLACK);
+            DrawText(TextFormat("White's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, WHITE);
         }
         else{
-            DrawText(TextFormat("Black's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 100, 70, 30, BLACK);
+            DrawText(TextFormat("Black's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, BLACK);
         }
 
         if(white_is_in_check){
-            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 120, 30, BLACK);
+            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 470, 25, WHITE);
         }
         if(black_is_in_check){
-            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 120, 30, BLACK);
+            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 270, 25, BLACK);
         }
+        
+        if(size_of_white_captures > 0){
+            int off_set_width = 10;
+            int height = 500;
+            for(int i = 0; i<size_of_white_captures; i++){
+                Image image = LoadImage(white_captures[i].iconPath);
+                ImageResize(&image, CELL_WIDTH * 0.5, CELL_HEIGHT * 0.5);
+                Texture2D texture = LoadTextureFromImage(image);
+                UnloadImage(image);
+                DrawTexture(texture, BOARD_WIDTH + off_set_width, height, WHITE);
+
+                ptrUsedTextures[sizeOfUsedTexturesArray - 1] = texture;
+                ptrUsedTextures = (Texture2D*) realloc(ptrUsedTextures, sizeof(Texture2D) + (sizeOfUsedTexturesArray*sizeof(Texture2D)));
+                sizeOfUsedTexturesArray +=1;
+
+                off_set_width += 30;
+                if(off_set_width >= 280){
+                    off_set_width = 10;
+                    height += 40;
+                }
+            }
+        }
+
+        if(size_of_black_captures > 0){
+            int off_set_width = 10;
+            int height = 300;
+            for(int i = 0; i<size_of_black_captures; i++){
+                Image image = LoadImage(black_captures[i].iconPath);
+                ImageResize(&image, CELL_WIDTH * 0.5, CELL_HEIGHT * 0.5);
+                Texture2D texture = LoadTextureFromImage(image);
+                UnloadImage(image);
+                DrawTexture(texture, BOARD_WIDTH + off_set_width, height, WHITE);
+
+                ptrUsedTextures[sizeOfUsedTexturesArray - 1] = texture;
+                ptrUsedTextures = (Texture2D*) realloc(ptrUsedTextures, sizeof(Texture2D) + (sizeOfUsedTexturesArray*sizeof(Texture2D)));
+                sizeOfUsedTexturesArray +=1;
+
+                off_set_width += 30;
+                if(off_set_width >= 280){
+                    off_set_width = 10;
+                    height += 40;
+                }
+            }
+        }
+
 
         EndDrawing();
         // // Freeing all the textures from the array and the pointer to the malloc
@@ -1157,6 +1244,10 @@ int main(void) {
             UnloadTexture(ptrUsedTextures[i]);
         }
         free(ptrUsedTextures);
+
+        // Program somehow crashes if I free these two
+        // free(white_captures);
+        // free(black_captures);
      }
 
     CloseWindow();
