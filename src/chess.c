@@ -844,6 +844,7 @@ bool is_in_check(int king_row, int king_col, struct Cell (*board)[8][8], bool ch
     return false;
 }
 
+// Updates seconds left global variables, to be run on a separate thread
 void* update_timers(){
 
     while(1){
