@@ -890,6 +890,7 @@ int main(void) {
     initialize_chess_board(&chess_board);
     InitWindow(BOARD_WIDTH + MENU_WIDTH, BOARD_HEIGHT, "Chess");
 
+    // Creating timer thread
     pthread_t timers_thread;
     pthread_create(&timers_thread, NULL, update_timers, NULL);
     pthread_mutex_init(&turn_mutex, NULL);
