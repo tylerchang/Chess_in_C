@@ -1,4 +1,6 @@
 .DS_Store
 src/play.c
 src/ChessGame.dSYM
+src/threading.c
+src/threading2.c
 

@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
+#include <time.h>
+#include <pthread.h>
+#include<unistd.h>
+
 #define CHESS_DARK (Color){ 111,115,210, 255 }
 #define CHESS_SELECTED (Color){ 244,244, 43, 255 }
 #define CHESS_LIGHT (Color){ 157,172,255, 255 }
@@ -26,6 +30,11 @@ const char wKingPath[] = "../assets/white-king.png";
 const char wKnightPath[] = "../assets/white-knight.png";
 const char wBishopPath[] = "../assets/white-bishop.png";
 const char wQueenPath[] = "../assets/white-queen.png";
+
+int white_seconds_left = 599;
+int black_seconds_left = 599;
+bool is_white_turn = true;
+pthread_mutex_t turn_mutex;
 
 
 struct Piece{
@@ -835,18 +844,31 @@ bool is_in_check(int king_row, int king_col, struct Cell (*board)[8][8], bool ch
     return false;
 }
 
+void* update_timers(){
+
+    while(1){
+        pthread_mutex_lock(&turn_mutex);
+
+        if (is_white_turn && white_seconds_left > 0) {
+            printf("White's turn: %d seconds left\n", white_seconds_left);
+            white_seconds_left--;
+        } 
+        else if (!is_white_turn && black_seconds_left > 0) {
+            printf("Black's turn: %d seconds left\n", black_seconds_left);
+            black_seconds_left--;
+        }
+
+        pthread_mutex_unlock(&turn_mutex);
+
+        sleep(1);  // Update timer every second
+    }
+
+}
 
 int main(void) {
 
+    // Only log errors
     SetTraceLogLevel(LOG_ERROR);
-    // LOG_ALL: 0
-    // LOG_TRACE: 1
-    // LOG_DEBUG: 2
-    // LOG_INFO: 3
-    // LOG_WARNING: 4
-    // LOG_ERROR: 5
-    // LOG_FATAL: 6
-    // LOG_NONE: 7
 
     struct Cell chess_board [8][8];
     int selected_row = -1;
@@ -858,24 +880,25 @@ int main(void) {
     bool white_is_in_check = false;
     bool black_is_in_check = false;
     bool cell_is_selected = false;
-    bool is_white_turn = true;
 
     struct Piece *white_captures = (struct Piece*) malloc(sizeof(struct Piece));
     int size_of_white_captures = 1;
     struct Piece *black_captures = (struct Piece*) malloc(sizeof(struct Piece));
     int size_of_black_captures = 1;
 
-
     initialize_chess_board(&chess_board);
     InitWindow(BOARD_WIDTH + MENU_WIDTH, BOARD_HEIGHT, "Chess");
+
+    pthread_t timers_thread;
+    pthread_create(&timers_thread, NULL, update_timers, NULL);
+    pthread_mutex_init(&turn_mutex, NULL);
 
     while (!WindowShouldClose()) {
 
         BeginDrawing();
         ClearBackground(CHESS_DARK);
-
+        
         // Line to divide game and menu
-        // DrawLine(BOARD_WIDTH, 0, BOARD_WIDTH, BOARD_HEIGHT, BLACK); 
         DrawLineEx((Vector2){BOARD_WIDTH, 0}, (Vector2){BOARD_WIDTH, BOARD_HEIGHT}, 10.0, BLACK); 
 
         // Drawing the grid and attaching coordinates to chess_board Cells
@@ -1000,7 +1023,9 @@ int main(void) {
                                     white_is_in_check = false;
 
                                     // Changing turns
-                                    is_white_turn = false;               
+                                    pthread_mutex_lock(&turn_mutex);                              
+                                    is_white_turn = false;
+                                    pthread_mutex_unlock(&turn_mutex);                                             
                                 }
 
                             }
@@ -1038,7 +1063,9 @@ int main(void) {
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
 
                                     // Changing turns
-                                    is_white_turn = false;  
+                                    pthread_mutex_lock(&turn_mutex);                              
+                                    is_white_turn = false;
+                                    pthread_mutex_unlock(&turn_mutex);                                
                                 }
                                 else{
                                     printf("Invalid, this move will put white in check\n");
@@ -1094,7 +1121,9 @@ int main(void) {
                                     black_is_in_check = false;
 
                                     // Changing turns
+                                    pthread_mutex_lock(&turn_mutex);                              
                                     is_white_turn = true;               
+                                    pthread_mutex_unlock(&turn_mutex);                              
                                 }
 
                             }
@@ -1132,7 +1161,9 @@ int main(void) {
                                     strcpy(chess_board[selected_row][selected_col].occupiedPiece.iconPath, "");
 
                                     // Changing turns
-                                    is_white_turn = true;                                    
+                                    pthread_mutex_lock(&turn_mutex);
+                                    is_white_turn = true; 
+                                    pthread_mutex_unlock(&turn_mutex);                              
                                 }
                                 else{
                                     printf("Invalid move, this will put black in check\n");
@@ -1176,9 +1207,13 @@ int main(void) {
                 }
             }
         }
-        
+
+        // Menu Design
+
+        // Game title
         DrawText(TextFormat("Tyler's Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 125, 20, 35, CHESS_LIGHT);
 
+        // Turn titles
         if(is_white_turn){
             DrawText(TextFormat("White's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, WHITE);
         }
@@ -1186,13 +1221,35 @@ int main(void) {
             DrawText(TextFormat("Black's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, BLACK);
         }
 
+        // Check titles
         if(white_is_in_check){
-            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 470, 25, WHITE);
+            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 95, 20, WHITE);
         }
         if(black_is_in_check){
-            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 120, 270, 25, BLACK);
+            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 95, 20, BLACK);
         }
+
+        // Timer formatting and display
+        pthread_mutex_lock(&turn_mutex);
+        int timer_font = 45;
+        int timer_x_offset = 55;
+        char white_time_str[6];
+        sprintf(white_time_str, "%02d:%02d", white_seconds_left / 60, white_seconds_left % 60);
+        char black_time_str[6];
+        sprintf(black_time_str, "%02d:%02d", black_seconds_left / 60, black_seconds_left % 60);
+
+        int timer_back_x = BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset - 7;
+        int timer_back_width = 122;
+        int timer_back_height = 55;
+
+        DrawRectangle(timer_back_x, 450 - 10, timer_back_width*1.04, timer_back_height*1.04, CHESS_LIGHT);
+        DrawRectangle(timer_back_x, 250 - 10, timer_back_width*1.04, timer_back_height*1.04, CHESS_LIGHT);
+
+        DrawText(TextFormat("%s", white_time_str), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset, 450, timer_font, WHITE);
+        DrawText(TextFormat("%s", black_time_str), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset, 250, timer_font, BLACK);
+        pthread_mutex_unlock(&turn_mutex);
         
+        // Captured pieces for white
         if(size_of_white_captures > 0){
             int off_set_width = 10;
             int height = 500;
@@ -1215,6 +1272,7 @@ int main(void) {
             }
         }
 
+        // Captured pieces for black
         if(size_of_black_captures > 0){
             int off_set_width = 10;
             int height = 300;
@@ -1237,14 +1295,14 @@ int main(void) {
             }
         }
 
-
         EndDrawing();
+
         // // Freeing all the textures from the array and the pointer to the malloc
         for(int i = 0; i < sizeOfUsedTexturesArray; i++){
             UnloadTexture(ptrUsedTextures[i]);
         }
         free(ptrUsedTextures);
-
+        pthread_mutex_destroy(&turn_mutex);
         // Program somehow crashes if I free these two
         // free(white_captures);
         // free(black_captures);
