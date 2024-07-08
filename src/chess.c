@@ -1215,20 +1215,12 @@ int main(void) {
         // Game title
         DrawText(TextFormat("Tyler's Chess"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 125, 20, 35, CHESS_LIGHT);
 
-        // Turn titles
-        if(is_white_turn){
-            DrawText(TextFormat("White's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, WHITE);
-        }
-        else{
-            DrawText(TextFormat("Black's Turn"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, BLACK);
-        }
-
         // Check titles
         if(white_is_in_check){
-            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 95, 20, WHITE);
+            DrawText(TextFormat("White In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, WHITE);
         }
         if(black_is_in_check){
-            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 95, 20, BLACK);
+            DrawText(TextFormat("Black In Check"), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - 85, 70, 23, BLACK);
         }
 
         // Timer formatting and display
@@ -1244,17 +1236,17 @@ int main(void) {
         int timer_back_width = 122;
         int timer_back_height = 55;
 
-        DrawRectangle(timer_back_x, 450 - 10, timer_back_width*1.04, timer_back_height*1.04, CHESS_LIGHT);
-        DrawRectangle(timer_back_x, 250 - 10, timer_back_width*1.04, timer_back_height*1.04, CHESS_LIGHT);
+        DrawRectangle(timer_back_x, 450 - 145, timer_back_width*1.04, timer_back_height*1.04, CHESS_LIGHT);
+        DrawRectangle(timer_back_x, 250 - 145, timer_back_width*1.04, timer_back_height*1.04, CHESS_LIGHT);
 
-        DrawText(TextFormat("%s", white_time_str), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset, 450, timer_font, WHITE);
-        DrawText(TextFormat("%s", black_time_str), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset, 250, timer_font, BLACK);
+        DrawText(TextFormat("%s", white_time_str), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset, 450 - 140, timer_font, WHITE);
+        DrawText(TextFormat("%s", black_time_str), BOARD_WIDTH + (0.5 * (double)MENU_WIDTH) - timer_x_offset, 250 - 140, timer_font, BLACK);
         pthread_mutex_unlock(&turn_mutex);
         
         // Captured pieces for white
         if(size_of_white_captures > 0){
             int off_set_width = 10;
-            int height = 500;
+            int height = 500 - 135;
             for(int i = 0; i<size_of_white_captures; i++){
                 Image image = LoadImage(white_captures[i].iconPath);
                 ImageResize(&image, CELL_WIDTH * 0.5, CELL_HEIGHT * 0.5);
@@ -1277,7 +1269,7 @@ int main(void) {
         // Captured pieces for black
         if(size_of_black_captures > 0){
             int off_set_width = 10;
-            int height = 300;
+            int height = 300 - 135;
             for(int i = 0; i<size_of_black_captures; i++){
                 Image image = LoadImage(black_captures[i].iconPath);
                 ImageResize(&image, CELL_WIDTH * 0.5, CELL_HEIGHT * 0.5);
