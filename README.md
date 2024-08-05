@@ -7,6 +7,9 @@ To compile, make sure to have raylib [installed](https://github.com/raysan5/rayl
 eval cc chess.c $(pkg-config --libs --cflags raylib) -o ChessGame
 ```
 
+<img src="https://github.com/tylerchang/Chess_in_C/blob/main/screenshots/demonstration.gif" width="400" height="300"/>
+
+
 ![Gameplay_1](https://github.com/tylerchang/Chess_in_C/blob/main/screenshots/pic1.png)
 
 ![Gameplay_2](https://github.com/tylerchang/Chess_in_C/blob/main/screenshots/pic2.png)
